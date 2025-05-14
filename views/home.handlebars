@@ -1,0 +1,16 @@
+<h1>Cadastro das visitas:</h1>
+
+{{#each visitas}}
+  <h2>{{nome}}</h2>
+  <p>Email: {{email}}</p>
+  <p>Celular: {{numeroCelular}}</p>
+  {{!-- <p>CPF: {{cpf}}</p> --}}
+  <p>Animal: {{animal}}</p>
+  <p>Data: {{dataVisita}}</p>
+  <p>Hora: {{horaVisita}}</p>
+
+  <a href="/editar/{{id}}"><button>Atualizar</button></a>
+  <a href="/deletar/{{id}}"><button>Deletar</button></a>
+
+  <hr>
+{{/each}}

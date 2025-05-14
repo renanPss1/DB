@@ -1,0 +1,26 @@
+<h2>Editar Visita</h2>
+
+<form action="/atualizar/{{visita.id}}" method="POST">
+  <p>Nome:</p>
+  <input type="text" name="nome" value="{{visita.nome}}" required>
+
+  <p>Email:</p>
+  <input type="email" name="email" value="{{visita.email}}" required>
+
+  <p>Celular:</p>
+  <input type="text" name="numeroCelular" value="{{visita.numeroCelular}}">
+
+  <p>CPF:</p>
+  <input type="text" name="cpf" value="{{visita.cpf}}">
+
+  <p>Animal:</p>
+  <input type="text" name="animal" value="{{visita.animal}}">
+
+  <p>Data da Visita:</p>
+  <input type="date" name="dataVisita" value="{{visita.dataVisita}}">
+
+  <p>Hora da Visita:</p>
+  <input type="time" name="horaVisita" value="{{visita.horaVisita}}">
+
+  <button type="submit">Salvar Atualização</button>
+</form>
