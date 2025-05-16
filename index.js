@@ -3,6 +3,7 @@ const app = express();
 const { engine } = require('express-handlebars');
 const bodyParser = require('body-parser');
 const Visita = require('./models/Visita');
+const { Op } = require('sequelize'); // IMPORTAÇÃO NECESSÁRIA PARA BUSCA
 
 // Template engine
 app.engine('handlebars', engine({
@@ -18,24 +19,12 @@ app.set('view engine', 'handlebars');
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
-// Rotas
-// visualidados web do banco de dados
- app.get('/lista', function (req, res) {
-   Visita.findAll({ raw: true })
-     .then(function (visitas) {
-       res.render('home', { visitas: visitas });
-     })
-     .catch(function (erro) {
-       res.status(500).send('Erro ao carregar visitas: ' + erro);
-     });
- });
-
 // Página inicial
 app.get('/', function(req, res) {
   res.render('paginainicial');
 });
 
-// Formulário de visitas
+// Página de cadastro
 app.get('/cad', function(req, res) {
   res.render('formulario');
 });
@@ -50,7 +39,53 @@ app.get('/animais', function(req, res) {
   res.render('animais');
 });
 
+// Página de "Acessar Formulários" - lista todas as visitas
+app.get('/editar', function (req, res) {
+  Visita.findAll({ raw: true })
+    .then(function (visitas) {
+      res.render('home', { visitas: visitas });
+    })
+    .catch(function (erro) {
+      res.status(500).send('Erro ao carregar visitas: ' + erro);
+    });
+});
 
+// Rota de busca por nome ou CPF
+app.get('/buscar', function (req, res) {
+  const termo = req.query.q || '';
+
+  Visita.findAll({
+    where: {
+      [Op.or]: [
+        { nome: { [Op.like]: `%${termo}%` } },
+        { cpf: { [Op.like]: `%${termo}%` } }
+      ]
+    },
+    raw: true
+  })
+  .then(function (visitas) {
+    res.render('home', {
+      visitas: visitas,
+      query: termo
+    });
+  })
+  .catch(function (erro) {
+    res.status(500).send('Erro na busca: ' + erro);
+  });
+});
+
+// Rota antiga de listagem (ainda mantida se quiser usar)
+app.get('/lista', function (req, res) {
+  Visita.findAll({ raw: true })
+    .then(function (visitas) {
+      res.render('home', { visitas: visitas });
+    })
+    .catch(function (erro) {
+      res.status(500).send('Erro ao carregar visitas: ' + erro);
+    });
+});
+
+// Adiciona nova visita
 app.post('/add', function (req, res) {
   Visita.create({
     nome: req.body.nome,
@@ -61,24 +96,25 @@ app.post('/add', function (req, res) {
     dataVisita: req.body.dataVisita,
     horaVisita: req.body.horaVisita
   }).then(function () {
+    // Redireciona para a página de "INICIO"
     res.redirect('/');
   }).catch(function (erro) {
     res.status(500).send('Erro ao salvar a visita: ' + erro);
   });
 });
 
- app.get('/deletar/:id', function (req, res) {
-   Visita.destroy({ where: { id: req.params.id } })
-     .then(function () {
-       
-//       res.status(500).send('Visita deletada com sucesso!');
-       res.redirect('/lista');
-     })
-     .catch(function (erro) {
-       res.status(500).send('Erro ao deletar a visita: ' + erro);
-     });
- });
-//     rota get editar carrega os dados preeenchidos pela visita
+// Deletar visita
+app.get('/deletar/:id', function (req, res) {
+  Visita.destroy({ where: { id: req.params.id } })
+    .then(function () {
+      res.redirect('/editar');
+    })
+    .catch(function (erro) {
+      res.status(500).send('Erro ao deletar a visita: ' + erro);
+    });
+});
+
+// Carregar formulário de edição
 app.get('/editar/:id', function (req, res) {
   Visita.findByPk(req.params.id)
     .then(function (visita) {
@@ -93,7 +129,7 @@ app.get('/editar/:id', function (req, res) {
     });
 });
 
-// rota para atualizados os dados do cliente
+// Atualizar dados da visita
 app.post('/atualizar/:id', function (req, res) {
   Visita.update({
     nome: req.body.nome,
@@ -106,14 +142,13 @@ app.post('/atualizar/:id', function (req, res) {
   }, {
     where: { id: req.params.id }
   }).then(() => {
-    res.redirect('/lista');
+    res.redirect('/editar');
   }).catch((erro) => {
     res.status(500).send('Erro ao atualizar visita: ' + erro);
   });
 });
 
-
+// Iniciar servidor
 app.listen(3000, function () {
   console.log('Servidor rodando na URL http://localhost:3000');
 });
-

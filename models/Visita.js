@@ -31,7 +31,7 @@ const Visita = db.sequelize.define('visitas', {
   }
 });
 
-Visita.sync({ force: true }); // Execute isso apenas uma vez para criar a tabela
+// Visita.sync({ force: true }); // Execute isso apenas uma vez para criar a tabela
 
 module.exports = Visita;
 
